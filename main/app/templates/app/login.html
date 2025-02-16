@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Redirect Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+  </head>
+  <body>
+    <h2>Google Sign-In with Redirect</h2>
+    <button id="google-login-btn">Login with Google</button>
+    <button id="user-details">Get user details</button>
+
+    <script>
+      // Your web app's Firebase configuration
+      var config = {
+        apiKey: "{{ apiKey }}",
+        authDomain: "{{ authDomain }}",
+      };
+      firebase.initializeApp(config);
+
+      const auth = firebase.auth();
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      let google_identity_access_token = null;
+
+      function create_new_user_fallback(google_identity_platform_response) {
+        fetch("/create_new_user_fallback/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: JSON.stringify({
+            user_uid: google_identity_platform_response.user.uid,
+            user_email: google_identity_platform_response.user.email,
+          }),
+        });
+      }
+
+      function googleSignIn() {
+        firebase
+          .auth()
+          .signInWithPopup(provider)
+          .then((result) => {
+            if (result.user) {
+              result.user.getIdToken().then((token) => {
+                google_identity_access_token = token;
+
+                console.log("Token stored:", google_identity_access_token);
+              });
+
+              if (result.additionalUserInfo.isNewUser == true) {
+                console.log("new user registered");
+                create_new_user_fallback(result);
+              } else {
+                console.log("old user logined");
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Sign-in error:", error);
+          });
+      }
+
+      function getUserDetails() {
+        fetch("/user/details/", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${google_identity_access_token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((response_json) => console.log(response_json));
+      }
+
+      document
+        .getElementById("google-login-btn")
+        .addEventListener("click", () => {
+          googleSignIn();
+        });
+
+      document.getElementById("user-details").addEventListener("click", () => {
+        getUserDetails();
+      });
+    </script>
+  </body>
+</html>
