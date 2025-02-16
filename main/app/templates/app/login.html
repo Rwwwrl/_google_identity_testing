@@ -10,6 +10,7 @@
     <h2>Google Sign-In with Redirect</h2>
     <button id="google-login-btn">Login with Google</button>
     <button id="user-details">Get user details</button>
+    <button id="logout">Logout</button>
 
     <script>
       // Your web app's Firebase configuration
@@ -70,8 +71,39 @@
             Authorization: `Bearer ${google_identity_access_token}`,
           },
         })
+          .then((response) => {
+            if (response.status == 200) {
+              return response;
+            }
+            if (response.status == 402) {
+              console.log("unauthorized exception");
+              return response;
+            }
+          })
           .then((response) => response.json())
           .then((response_json) => console.log(response_json));
+      }
+
+      function logOut() {
+        fetch("/logout/", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${google_identity_access_token}`,
+          },
+        })
+          .then((response) => {
+            if (response.status == 402) {
+              console.log("unauthorized exception");
+            }
+
+            return response;
+          })
+          .then((response) => {
+            auth.signOut();
+            // auth.signOut().then(() => {
+            // //   google_identity_access_token = null;
+            // });
+          });
       }
 
       document
@@ -82,6 +114,10 @@
 
       document.getElementById("user-details").addEventListener("click", () => {
         getUserDetails();
+      });
+
+      document.getElementById("logout").addEventListener("click", () => {
+        logOut();
       });
     </script>
   </body>

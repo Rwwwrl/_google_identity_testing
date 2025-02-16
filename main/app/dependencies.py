@@ -1,16 +1,16 @@
 from firebase_admin import auth
-from firebase_admin.auth import ExpiredIdTokenError, InvalidIdTokenError
+from firebase_admin.auth import ExpiredIdTokenError, InvalidIdTokenError, RevokedIdTokenError
 
 
-class ValidationFailedException(Exception):
+class IdTokenValidationFailedException(Exception):
     pass
 
 
 def verify_id_token(id_token: str) -> str:
     try:
-        id_token = auth.verify_id_token(id_token=id_token)
-    except (InvalidIdTokenError, ExpiredIdTokenError):
-        raise ValidationFailedException
+        id_token = auth.verify_id_token(id_token=id_token, check_revoked=True)
+    except (InvalidIdTokenError, ExpiredIdTokenError, RevokedIdTokenError):
+        raise IdTokenValidationFailedException
 
     return id_token
 
