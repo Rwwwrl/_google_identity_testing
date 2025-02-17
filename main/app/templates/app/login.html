@@ -11,6 +11,7 @@
     <button id="google-login-btn">Login with Google</button>
     <button id="user-details">Get user details</button>
     <button id="logout">Logout</button>
+    <button id="delete_user">Delete user</button>
 
     <script>
       // Your web app's Firebase configuration
@@ -106,6 +107,15 @@
           });
       }
 
+      function deleteUser() {
+        fetch("/user/delete/", {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${google_identity_access_token}`,
+          },
+        });
+      }
+
       document
         .getElementById("google-login-btn")
         .addEventListener("click", () => {
@@ -118,6 +128,10 @@
 
       document.getElementById("logout").addEventListener("click", () => {
         logOut();
+      });
+
+      document.getElementById("delete_user").addEventListener("click", () => {
+        deleteUser();
       });
     </script>
   </body>

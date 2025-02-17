@@ -42,6 +42,20 @@ class Logout(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class UserDelete(APIView):
+    def delete(self, request):
+        id_token = id_token_from_headers(headers=dict(request.headers))
+        try:
+            id_token = verify_id_token(id_token=id_token)
+        except IdTokenValidationFailedException:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        user_google_identity_uid = get_user_google_identity_uid_from_id_token(id_token=id_token)
+
+        auth.delete_user(uid=user_google_identity_uid)
+        return Response(status=status.HTTP_200_OK)
+
+
 class CreateNewUserFallback(APIView):
     def post(self, request):
         payload = CreateNewUserPayload(**request.data)
