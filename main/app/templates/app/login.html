@@ -22,6 +22,8 @@
       firebase.initializeApp(config);
 
       const auth = firebase.auth();
+      auth.tenantId = "dev-organization-xi3rm";
+
       const provider = new firebase.auth.GoogleAuthProvider();
 
       let google_identity_access_token = null;
@@ -36,6 +38,7 @@
           body: JSON.stringify({
             user_uid: google_identity_platform_response.user.uid,
             user_email: google_identity_platform_response.user.email,
+            tenant_id: google_identity_platform_response.user.tenantId,
           }),
         });
       }
@@ -48,7 +51,7 @@
             if (result.user) {
               result.user.getIdToken().then((token) => {
                 google_identity_access_token = token;
-
+                console.log("tenantId: ", result.user.tenantId);
                 console.log("Token stored:", google_identity_access_token);
               });
 

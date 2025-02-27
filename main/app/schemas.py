@@ -1,15 +1,17 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import EmailStr
 
+from app.common import DTO
 from app.models import User
 
 
-class BaseSchema(BaseModel, frozen=True):
-    model_config = ConfigDict(extra="forbid")
+class BaseSchema(DTO):
+    pass
 
 
 class CreateNewUserPayload(BaseSchema):
     user_uid: str
     user_email: EmailStr
+    tenant_id: str
 
 
 class UserSchema(BaseSchema):
